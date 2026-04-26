@@ -1,0 +1,15 @@
+Machine Learning (ML) is a branch of Artificial Intelligence (AI) that focuses on enabling computers to learn from data and make decisions or predictions without being explicitly programmed for every task. Instead of following fixed instructions, ML systems identify patterns in data and improve their performance over time through experience.
+
+At its core, machine learning uses algorithms to process large amounts of data, detect meaningful relationships, and generate models that can be used for tasks such as classification, prediction, and decision-making. These models are trained using historical data and can adapt as new data becomes available.
+
+There are three main types of machine learning:
+
+1. Supervised Learning – In this approach, the model is trained on labeled data, where the correct output is already known. It is commonly used for tasks like spam detection and price prediction.
+
+2. Unsupervised Learning – This method works with unlabeled data and aims to find hidden patterns or groupings within the data. Clustering and anomaly detection are typical applications.
+
+3. Reinforcement Learning – In this type, an agent learns by interacting with an environment and receiving rewards or penalties based on its actions. It is widely used in robotics, gaming, and autonomous systems.
+
+Machine learning has become an essential technology in today’s digital world. It powers applications such as recommendation systems, image and speech recognition, fraud detection, and self-driving vehicles. With the increasing availability of data and computational power, ML continues to grow rapidly and is shaping the future of technology and innovation.
+
+In conclusion, machine learning is transforming how systems operate by enabling them to learn, adapt, and make intelligent decisions. It plays a critical role in modern computing and is a key driver of advancements in various industries.
