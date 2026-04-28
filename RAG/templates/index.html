@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF RAG Analyzer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 300; background: #fff; color: #000; max-width: 680px; margin: 60px auto; padding: 0 20px; }
+    h1 { font-size: 1.2rem; font-weight: 400; letter-spacing: 0.05em; margin-bottom: 40px; border-bottom: 1px solid #000; padding-bottom: 12px; }
+    label { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+    input[type="file"] { font-size: 0.85rem; font-weight: 300; width: 100%; border: 1px solid #000; padding: 8px; margin-bottom: 10px; background: #fff; }
+    button { font-size: 0.8rem; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; background: #000; color: #fff; border: none; padding: 9px 20px; cursor: pointer; }
+    button:disabled { background: #999; cursor: not-allowed; }
+    button:hover:not(:disabled) { background: #333; }
+    #upload-status { font-size: 0.8rem; margin-top: 8px; min-height: 18px; }
+    .section { margin-top: 36px; }
+    textarea { width: 100%; border: 1px solid #000; padding: 10px; font-size: 0.9rem; font-weight: 300; font-family: inherit; resize: vertical; min-height: 80px; outline: none; }
+    #answer-box { margin-top: 20px; border: 1px solid #000; padding: 14px; font-size: 0.9rem; font-weight: 300; line-height: 1.6; min-height: 60px; white-space: pre-wrap; display: none; }
+    .divider { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+    #query-section { display: none; }
+  </style>
+</head>
+<body>
+  <h1>PDF RAG Analyzer</h1>
+
+  <!-- Upload -->
+  <div>
+    <label>Upload PDF</label>
+    <input type="file" id="pdf-input" accept=".pdf">
+    <button id="upload-btn" onclick="uploadPDF()">Upload</button>
+    <div id="upload-status"></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Query -->
+  <div id="query-section" class="section">
+    <label>Ask a question</label>
+    <textarea id="query-input" placeholder="Type your question about the PDF..."></textarea>
+    <br><br>
+    <button id="query-btn" onclick="submitQuery()">Ask</button>
+    <div id="answer-box"></div>
+  </div>
+
+  <script>
+    let sessionId = null;
+
+    async function uploadPDF() {
+      const file = document.getElementById('pdf-input').files[0];
+      const status = document.getElementById('upload-status');
+      const btn = document.getElementById('upload-btn');
+
+      if (!file) { status.textContent = 'Select a PDF file.'; return; }
+
+      const formData = new FormData();
+      formData.append('pdf', file);
+
+      btn.disabled = true;
+      status.textContent = 'Processing...';
+
+      try {
+        const res = await fetch('/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.error) {
+          status.textContent = 'Error: ' + data.error;
+        } else {
+          sessionId = data.session_id;
+          status.textContent = `Ready — ${data.pages} chunk(s) indexed.`;
+          document.getElementById('query-section').style.display = 'block';
+          document.getElementById('answer-box').style.display = 'none';
+        }
+      } catch (e) {
+        status.textContent = 'Upload failed.';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function submitQuery() {
+      const query = document.getElementById('query-input').value.trim();
+      const answerBox = document.getElementById('answer-box');
+      const btn = document.getElementById('query-btn');
+
+      if (!query) return;
+
+      btn.disabled = true;
+      answerBox.style.display = 'block';
+      answerBox.textContent = 'Thinking...';
+
+      try {
+        const res = await fetch('/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId, query })
+        });
+        const data = await res.json();
+        answerBox.textContent = data.error ? 'Error: ' + data.error : data.answer;
+      } catch (e) {
+        answerBox.textContent = 'Request failed.';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById('query-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitQuery(); }
+    });
+  </script>
+</body>
+</html>
